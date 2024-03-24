@@ -1,0 +1,64 @@
+---
+- name: Create NGINX deployment
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nginx-deployment
+        labels:
+          app: nginx
+      spec:
+        replicas: 3
+        selector:
+          matchLabels:
+            app: nginx
+        template:
+          metadata:
+            labels:
+              app: nginx
+          spec:
+            containers:
+            - name: nginx
+              image: nginx:latest
+              ports:
+              - containerPort: 80
+
+- name: Create NGINX service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: nginx-service
+      spec:
+        selector:
+          app: nginx
+        ports:
+        - port: 80
+          targetPort: 80
+
+- name: Wait for NGINX deployment to be ready
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: nginx-deployment
+    namespace: default
+  register: deployment_info
+  until: deployment_info.resources[0].status.availableReplicas == 3
+  retries: 10
+  delay: 5
+
+- name: Get NGINX service information
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    name: nginx-service
+    namespace: default
+  register: service_info
+
+- name: Display NGINX service URL
+  debug:
+    msg: "NGINX is accessible at http://{{ service_info.resources[0].spec.clusterIP }}"

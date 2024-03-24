@@ -1,0 +1,21 @@
+---
+# - name: Install dependencies for Docker
+#   ansible.builtin.yum::
+#    name:
+#      - yum-utils
+#    state: present
+
+- name: Install Docker
+  ansible.builtin.yum:
+      name: "{{ packages }}"
+      state: present
+  vars:
+    packages:
+      - docker
+     # - containerd
+
+- name: Start & enable Docker service
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: yes

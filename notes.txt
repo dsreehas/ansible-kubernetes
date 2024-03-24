@@ -1,0 +1,67 @@
+yum install docker
+systemctl enable docker
+systemctl start docker
+
+
+# Set SELinux in permissive mode (effectively disabling it)
+sudo setenforce 0
+sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+
+# This overwrites any existing configuration in /etc/yum.repos.d/kubernetes.repo
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/repodata/repomd.xml.key
+exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
+EOF
+
+
+sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+
+
+sudo systemctl enable --now kubelet
+
+sudo kubeadm reset
+
+kubeadm init  --apiserver-advertise-address=<control-node-private-ipv4> --pod-network-cidr=192.168.0.0/16(calico)
+
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.2/manifests/tigera-operator.yaml
+kubectl get nodes
+
+
+172.31.61.126
+
+54.237.94.122
+
+
+
+# - name: Set up Kubernetes for k8s user
+#   command: "{{ item }}"
+#   when: inventory_hostname in groups['k8s-master']
+#   with_items:
+#     - mkdir -p /home/k8s/.kube
+#     - cp -i /etc/kubernetes/admin.conf /home/k8s/.kube/config
+#     - chown k8s:k8s /home/k8s/.kube/config
+
+# - name: Install Flannel pod network
+#   become: false
+#   when: inventory_hostname in groups['k8s-master']
+#   command: kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
+
+
+
+# - name: Restart kubelet
+#   service:
+#     name: kubelet
+#     daemon_reload: yes
+#     state: restarted
+

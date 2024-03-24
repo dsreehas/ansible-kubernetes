@@ -1,0 +1,118 @@
+---
+- name: Add YUM repository for Kubernetes
+  ansible.builtin.copy:
+    src: ../files/kubernetes.repo
+    dest: /etc/yum.repos.d/kubernetes.repo
+
+- name: Install Kubernetes packages
+  ansible.builtin.yum:
+    name: "{{ packages }}"
+    state: present
+    disable_excludes: kubernetes
+
+  vars:
+    packages:
+      - kubelet
+      - kubeadm
+      - kubectl
+
+- name: Reset Kubernetes cluster
+  become: true
+  command: kubeadm reset -f
+
+- name: Initialize the Kubernetes cluster using kubeadm command
+  become: true
+  when: inventory_hostname in groups['k8s-master']
+  command: kubeadm init --apiserver-advertise-address="54.166.135.55" --pod-network-cidr=192.168.0.0/16
+
+# - name: Pause for 2 minutes
+#   when: inventory_hostname in groups['k8s-master']
+#   pause:
+#     minutes: 2
+
+- name: Create .kube directory
+  when: inventory_hostname in groups['k8s-master']
+  ansible.builtin.file:
+    path: $HOME/.kube
+    state: directory
+
+- name: Copy admin.conf to user's kube config
+  when: inventory_hostname in groups['k8s-master']
+  become: true
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: $HOME/.kube/config
+    remote_src: yes
+    
+- name: Set ownership of kube config
+  when: inventory_hostname in groups['k8s-master']
+  become: true
+  ansible.builtin.file:
+    path: $HOME/.kube/config
+    owner: "{{ ansible_user_uid }}"
+    group: "{{ ansible_user_gid }}"
+
+# - name: Deploy Calico network
+#   become: true
+#   when: inventory_hostname in groups['k8s-master']
+#   command: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.2/manifests/tigera-operator.yaml
+
+- name: Deploy Calico Pod network
+  become: true
+  shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.2/manifests/tigera-operator.yaml >> pod_network_setup.txt
+  args:
+    chdir: $HOME
+    creates: pod_network_setup.txt
+
+- name: Get cluster nodes
+  become: true
+  when: inventory_hostname in groups['k8s-master']
+  command: kubectl get nodes
+  register: cluster_nodes
+
+- name: Print cluster nodes
+  when: inventory_hostname in groups['k8s-master']
+  debug:
+    var: cluster_nodes.stdout_lines
+
+- name: Get join command
+  when: inventory_hostname in groups['k8s-master']
+  become: true
+  shell: kubeadm token create --print-join-command
+  register: join_command_raw
+
+- name: Set join command
+  when: inventory_hostname in groups['k8s-master']
+  become: true
+  set_fact:
+    join_command: "{{ join_command_raw.stdout_lines[0] }}"
+
+# - name: Join cluster
+#   when: inventory_hostname in groups['k8s-worker']
+#   become: true
+#   shell: "{{ hostvars[groups['k8s-master'][0]].join_command }} >> node_joined.txt"
+#   args:
+#     chdir: $HOME
+#     creates: node_joined.txt
+
+
+
+# - name: Retrieve Kubernetes join command that is used to join worker node(s)
+#   become: false
+#   when: inventory_hostname in groups['k8s-master']
+#   shell: kubeadm token create --print-join-command
+#   register: join_command
+
+# - name: Attach kubeadm join command to a file on Ansible control node
+#   when: inventory_hostname in groups['k8s-master']
+#   local_action: "copy content='{{ join_command.stdout_lines[0] }}' dest=join-command"
+
+# - name: Copy the join-command file created above to worker node
+#   when: inventory_hostname in groups['k8s-worker']
+#   copy: src=join-command dest=/tmp/kubeadm-join.sh mode=0777
+
+# - name: Join the worker node to cluster
+#   when: inventory_hostname in groups['k8s-worker']
+#   command: sh /tmp/kubeadm-join.sh
+
+  
