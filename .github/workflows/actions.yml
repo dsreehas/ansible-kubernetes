@@ -23,9 +23,9 @@ jobs:
 
     - name: Set up SSH key
       run: |
-        mkdir -p /keys
-        echo "${{ secrets.ssh_key }}" > /keys/k8s-nginx.pem
-        chmod 400 /keys/k8s-nginx.pem
+        sudo mkdir -p /keys
+        sudo echo "${{ secrets.ssh_key }}" > /keys/k8s-nginx.pem
+        sudo chmod 400 /keys/k8s-nginx.pem
 
     - name: Run Ansible playbook
       run: |
