@@ -23,13 +23,13 @@ jobs:
 
     - name: Set up SSH key
       run: |
-        sudo mkdir -p /keys
-        echo "${{ secrets.ssh_key }}" | sudo tee /keys/k8s-nginx.pem > /dev/null
-        sudo chmod 600 /keys/k8s-nginx.pem
+        sudo mkdir -p /home/runner/keys
+        echo "${{ secrets.ssh_key }}" | sudo tee /home/runner/keys/k8s-nginx.pem > /dev/null
+        sudo chmod 600 /home/runner/keys/k8s-nginx.pem
 
     - name: Run Ansible playbook
       env:
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
         ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
       run: |
-        ansible-playbook ./playbooks/main.yml --private-key=/keys/k8s-nginx.pem
+        ansible-playbook ./playbooks/main.yml --private-key=/home/runner/keys/k8s-nginx.pem
