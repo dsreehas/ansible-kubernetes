@@ -23,7 +23,7 @@ jobs:
 
     - name: Set up SSH key
       run: |
-        sudo mkdir -p /home/runner/keys
+        mkdir -p /home/runner/keys
         echo "${{ secrets.ssh_key }}" | sudo tee /home/runner/keys/k8s-nginx.pem > /dev/null
         sudo chmod 600 /home/runner/keys/k8s-nginx.pem
 
