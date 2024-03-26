@@ -1,5 +1,3 @@
----
-
 name: Ansible Deployment
 
 on:
@@ -23,5 +21,12 @@ jobs:
     - name: Install Ansible
       run: pip install ansible
 
+    - name: Set up SSH key
+      run: |
+        mkdir -p /keys
+        echo "${{ secrets.ssh_key }}" > /keys/k8s-nginx.pem
+        chmod 400 /keys/k8s-nginx.pem
+
     - name: Run Ansible playbook
-      run: ansible-playbook ./playbooks/main.yml  # Change this to the path of your playbook file
+      run: |
+        ansible-playbook ./playbooks/main.yml --private-key=/keys/k8s-nginx.pem
