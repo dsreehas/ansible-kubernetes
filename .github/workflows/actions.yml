@@ -24,4 +24,4 @@ jobs:
       run: pip install ansible
 
     - name: Run Ansible playbook
-      run: ansible-playbook /playbooks/main.yml  # Change this to the path of your playbook file
+      run: ansible-playbook ./playbooks/main.yml  # Change this to the path of your playbook file
