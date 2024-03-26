@@ -3,11 +3,11 @@ name: Ansible Deployment
 on:
   push:
     branches:
-      - main  # Change this to your main branch name
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # You can choose a different operating system if needed
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'  # Change this to your desired Python version
+        python-version: '3.x'
 
     - name: Install Ansible
       run: pip install ansible
@@ -28,5 +28,8 @@ jobs:
         sudo chmod 600 /keys/k8s-nginx.pem
 
     - name: Run Ansible playbook
+      env:
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
       run: |
         ansible-playbook ./playbooks/main.yml --private-key=/keys/k8s-nginx.pem
