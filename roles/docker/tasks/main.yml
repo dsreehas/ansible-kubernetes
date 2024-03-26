@@ -1,21 +1,19 @@
 ---
-# - name: Install dependencies for Docker
-#   ansible.builtin.yum::
-#    name:
-#      - yum-utils
-#    state: present
+- name: Gather facts
+  ansible.builtin.setup:
 
-- name: Install Docker
+- name: Install Docker (for YUM-based environment)
   ansible.builtin.yum:
-      name: "{{ packages }}"
-      state: present
-  vars:
-    packages:
-      - docker
-     # - containerd
+    name: "{{ docker_packages }}"
+    state: present
+    update_cache: yes
+  notify: Restart Docker service
+  when: ansible_facts['os_family'] == 'RedHat'
 
-- name: Start & enable Docker service
-  ansible.builtin.service:
-    name: docker
-    state: started
-    enabled: yes
+- name: Install Docker (for APT-based environment)
+  ansible.builtin.package:
+    name: "{{ docker_packages }}"
+    state: present
+    update_cache: yes
+  notify: Restart Docker service
+  when: ansible_facts['os_family'] == 'Debian'

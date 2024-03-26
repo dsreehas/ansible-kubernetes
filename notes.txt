@@ -65,3 +65,97 @@ kubectl get nodes
 #     daemon_reload: yes
 #     state: restarted
 
+
+
+
+
+
+# - name: Retrieve Kubernetes join command that is used to join worker node(s)
+#   become: false
+#   when: inventory_hostname in groups['k8s-master']
+#   shell: kubeadm token create --print-join-command
+#   register: join_command
+
+# - name: Attach kubeadm join command to a file on Ansible control node
+#   when: inventory_hostname in groups['k8s-master']
+#   local_action: "copy content='{{ join_command.stdout_lines[0] }}' dest=join-command"
+
+# - name: Copy the join-command file created above to worker node
+#   when: inventory_hostname in groups['k8s-worker']
+#   copy: src=join-command dest=/tmp/kubeadm-join.sh mode=0777
+
+# - name: Join the worker node to cluster
+#   when: inventory_hostname in groups['k8s-worker']
+#   command: sh /tmp/kubeadm-join.sh
+
+  
+# - name: Remove swapfile from /etc/fstab
+#   mount:
+#     name: "{{ item }}"
+#     fstype: swap
+#     state: absent
+#   with_items:
+#     - swap
+#     - none
+
+# - name: Disable swap
+#   command: swapoff -a
+#   when: ansible_swaptotal_mb > 0
+
+# - name: Disable IPtables
+#   command: iptables -F
+
+# - name: Disable SELinux
+#   command: setenforce 0
+
+
+# - name: Deploy Calico network
+#   become: true
+#   when: inventory_hostname in groups['k8s-master']
+#   command: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.2/manifests/tigera-operator.yaml
+
+
+# - name: Pause for 2 minutes
+#   when: inventory_hostname in groups['k8s-master']
+#   pause:
+#     minutes: 2
+
+
+
+
+
+
+
+
+# - name: Generate join command
+#   when: inventory_hostname in groups['k8s-master']
+#   become: true
+#   shell: kubeadm token create --print-join-command
+#   register: join_command
+
+# - name: Copy join command to local file
+#   when: inventory_hostname in groups['k8s-master']
+#   delegate_to: localhost
+#   ansible.builtin.copy:
+#     content: "{{ join_command.stdout_lines[0] }}"
+#     dest: "/Users/user/tmp/join-command.sh"  
+#     mode: 'u+rwx'
+
+# - name: Copy the join command to worker node
+#   when: inventory_hostname in groups['k8s-worker']  
+#   ansible.builtin.copy:
+#     content: "/Users/user/tmp/join-command.sh"  
+#     dest: "/tmp/join-command.sh"
+#     mode: 'u+rwx'
+
+# - name: Join the node to cluster
+#   when: inventory_hostname in groups['k8s-worker']
+#   become: true
+#   ansible.builtin.command: sh /tmp/join-command.sh
+# - name: Generate join command
+#   when: inventory_hostname in groups['k8s-master']
+#   become: true
+#   shell: kubeadm token create --print-join-command
+#   register: join_command
+
+    

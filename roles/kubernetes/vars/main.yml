@@ -1,0 +1,11 @@
+---
+kubernetes_packages:
+  - "kubelet-1.29.3"
+  - "kubeadm-1.29.3"
+  - "kubectl-1.29.3"
+
+api_server_ip: "172.31.84.167"
+
+pod_network_cidr: "192.168.0.0/16"
+
+calico_tigera_operator_yaml_url: "https://raw.githubusercontent.com/projectcalico/calico/v3.27.2/manifests/tigera-operator.yaml"

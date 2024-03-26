@@ -1,0 +1,11 @@
+---
+# docker_service:
+#   name: docker
+#   state: started
+#   enabled: yes
+
+- name: Restart Docker service
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+    enabled: yes
