@@ -38,7 +38,7 @@
 - name: Initialize the Kubernetes cluster using kubeadm command
   become: true
   when: inventory_hostname in groups['k8s-master']
-  nsible.builtin.command: kubeadm init --apiserver-advertise-address="{{ api_server_ip }}" --pod-network-cidr="{{ pod_network_cidr }}"
+  ansible.builtin.command: kubeadm init --apiserver-advertise-address="{{ api_server_ip }}" --pod-network-cidr="{{ pod_network_cidr }}"
 
 - name: Create .kube directory
   when: inventory_hostname in groups['k8s-master']
@@ -92,7 +92,7 @@
 - name: Get cluster nodes
   become: true
   when: inventory_hostname in groups['k8s-master']
-  nsible.builtin.command: kubectl get nodes
+  ansible.builtin.command: kubectl get nodes
   register: cluster_nodes
 
 - name: Print cluster nodes

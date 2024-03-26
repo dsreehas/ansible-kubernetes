@@ -14,8 +14,8 @@
     - none
 
 - name: Disable swap
-  nsible.builtin.command: swapoff -a
+  ansible.builtin.command: swapoff -a
   when: ansible_swaptotal_mb > 0
 
 - name: Disable IPtables
-  nsible.builtin.command: iptables -F
+  ansible.builtin.command: iptables -F
