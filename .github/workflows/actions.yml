@@ -1,0 +1,27 @@
+---
+
+name: Ansible Deployment
+
+on:
+  push:
+    branches:
+      - main  # Change this to your main branch name
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # You can choose a different operating system if needed
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'  # Change this to your desired Python version
+
+    - name: Install Ansible
+      run: pip install ansible
+
+    - name: Run Ansible playbook
+      run: ansible-playbook /playbooks/main.yml  # Change this to the path of your playbook file
