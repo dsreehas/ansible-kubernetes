@@ -33,4 +33,4 @@ jobs:
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
         ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
       run: |
-        ansible-playbook ./playbooks/main.yml --private-key=/home/runner/keys/k8s-nginx.pem
+        ansible-playbook ./playbooks/main.yml
