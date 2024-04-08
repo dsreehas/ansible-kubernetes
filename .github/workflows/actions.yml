@@ -18,8 +18,10 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Install Ansible
-      run: pip install ansible
+    - name: Install Ansible and Ansible Lint
+      run: |
+        pip install ansible
+        pip install ansible-lint
 
     - name: Set up SSH key
       run: |
@@ -28,6 +30,9 @@ jobs:
         sudo chmod 600 /home/runner/keys/k8s-nginx.pem
         sudo cat /home/runner/keys/k8s-nginx.pem
         echo "test echo"
+
+    - name: Lint Ansible playbook
+      run: ansible-lint ./playbooks/main.yml
 
     - name: Run Ansible playbook
       env:
